@@ -18,8 +18,9 @@
   },
   "homepage": "https://github.com/techunits/simple-blockchain-node-mongo#readme",
   "dependencies": {
-    "crypto-js": "^4.0.0",
-    "elogger": "^1.0.8",
-    "mongoose": "^5.9.18"
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "elogger": "^1.0.9",
+    "mongoose": "^5.13.14"
   }
 }

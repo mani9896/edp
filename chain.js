@@ -5,7 +5,7 @@ const models = require('./models');
 
 
 class Block {
-    constructor(id, data, created_on, precedingHash='N/A') {
+    constructor(id, data, created_on, precedingHash = 'N/A') {
         this.id = id;
         this.data = data;
         this.created_on = created_on;
@@ -41,7 +41,7 @@ exports.AuditLogBlockchain = class AuditLogBlockchain {
 
     async initialize() {
         let genesisBlockInfo = await this.getGenesisBlock();
-        if(!genesisBlockInfo) {
+        if (!genesisBlockInfo) {
             logger.info('Initializing Genesis block . . .');
             let genesisBlockInfo = await this.createGenesisBlock();
             logger.info(`Genesis block: ${genesisBlockInfo.id}`);
@@ -59,7 +59,7 @@ exports.AuditLogBlockchain = class AuditLogBlockchain {
 
     async createTransaction(payload) {
         let precedingBlockInfo = await this.getPrecedingBlock();
-        if(precedingBlockInfo) {
+        if (precedingBlockInfo) {
             let id = new mongoose.Types.ObjectId().toHexString();
             let currentBlockInfo = new Block(id, payload, new Date().getTime(), precedingBlockInfo.hash);
             return await this.addNewBlock(currentBlockInfo);
@@ -86,23 +86,27 @@ exports.AuditLogBlockchain = class AuditLogBlockchain {
     }
 
     async getGenesisBlock() {
-        let blockInfo = await models.AuditLogChain.find().sort({ $natural: 1}).limit(1);
-        return (blockInfo.length > 0)?blockInfo[0]:null;
+        let blockInfo = await models.AuditLogChain.find().sort({ $natural: 1 }).limit(1);
+        return (blockInfo.length > 0) ? blockInfo[0] : null;
     }
 
     async getPrecedingBlock() {
-        let blockInfo = await models.AuditLogChain.find().sort({ $natural: -1}).limit(1);
-        return (blockInfo.length > 0)?blockInfo[0]:null;
+        let blockInfo = await models.AuditLogChain.find().sort({ $natural: -1 }).limit(1);
+        return (blockInfo.length > 0) ? blockInfo[0] : null;
     }
+    async getData(offset, limit) {
+        let blockInfo = await models.AuditLogChain.find().sort({ $natural: -1 }).limit(limit).offset(offset);
 
+        return blockInfo;
+    }
     async checkChainValidity() {
         let promise = new Promise((resolve) => {
             let previousBlock = null;
             let currentBlock = null;
             let idx = 1;
-            models.AuditLogChain.find({}).sort({$natural: 1}).cursor().on('data', entry => {
+            models.AuditLogChain.find({}).sort({ $natural: 1 }).cursor().on('data', entry => {
                 logger.info(`Validating Block(${idx}): ${entry.id}`);
-                if(previousBlock) {
+                if (previousBlock) {
                     // recreate the block with the info from database
                     currentBlock = new Block(entry.id, entry.data, entry.created_on, entry.preceding_hash);
                     currentBlock.proofOfWork(this.difficulty);
@@ -115,7 +119,7 @@ exports.AuditLogBlockchain = class AuditLogBlockchain {
                     else {
                         logger.debug(`Block Computed Hash Validated: ${currentBlock.id} -> SUCCESS`);
                     }
-                    
+
                     // validate chain block with preceding hash
                     if (currentBlock.preceding_hash !== previousBlock.hash) {
                         logger.error(`Previous block hash(${previousBlock.hash}) and preceding block hash(${currentBlock.preceding_hash}) doesn't match`);
@@ -136,9 +140,9 @@ exports.AuditLogBlockchain = class AuditLogBlockchain {
                     idx++;
                 }
             })
-            .on('end', function() {
-                resolve(true);
-            });
+                .on('end', function () {
+                    resolve(true);
+                });
         });
 
         return promise;
