@@ -3,7 +3,7 @@ const logger = require('elogger');
 
 //  connect to database
 const mongoose = require('mongoose');
-mongoose.connect("mongodb+srv://mani_0_0_:mani9896@cluster0.z9gfv.mongodb.net/?retryWrites=true&w=majority", {
+mongoose.connect("", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
